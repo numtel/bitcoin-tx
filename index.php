@@ -16,8 +16,15 @@ $_SESSION['sessionid'] = session_id();
 require 'settings.php';
 require 'sdk/src/facebook.php';
 
-//TODO:localization
+//localization
+$cur_language=array();
 function _tr($str){
+	global $cur_language;
+	foreach($cur_language as $index=>$value){
+		if($value===$str){
+			return $cur_language['str_tr_'.substr($index,9)];
+		}
+	}
 	return $str;
 }
 
@@ -47,6 +54,17 @@ if(
 			$_GET['value'],
 			$_GET['transaction_hash']
 		));
+	}else{
+		//record potential DDOS
+		if(isset($_SERVER ['HTTP_X_FORWARDED_FOR'])){
+			$clientIP = $_SERVER ['HTTP_X_FORWARDED_FOR'];
+		}elseif(isset($_SERVER ['HTTP_X_REAL_IP'])){
+			$clientIP = $_SERVER ['HTTP_X_REAL_IP'];
+		}else{
+			$clientIP = $_SERVER['REMOTE_ADDR'];
+		}
+		$error_query=$db->prepare('insert into `error_log` (`data`,`date`,`ip`) values (?, ?, ?)');
+		$error_query->execute(array(serialize($_GET),date('Y-m-d H:i:s'),$clientIP));
 	}
 	die('*ok*');
 }
@@ -84,6 +102,11 @@ $user = $facebook->getUser();
 if($user){
 	try {
 		$user_profile = $facebook->api('/me');
+		
+		if(file_exists('trans/'.$user_profile['locale'].'.txt')){
+			$cur_language=unserialize(file_get_contents('trans/'.$user_profile['locale'].'.txt'));
+		}
+
 	} catch (FacebookApiException $e) {
 		error_log($e);
 		$user = null;
@@ -258,7 +281,7 @@ if($user){
 						$post_status=$json_feed->error;
 					}else{
 						$btc_tx_query->execute(array($user,'2',$_POST['btc_addr'],null,$timestamp,$amount,$json_feed->tx_hash));
-						$post_status=$json_feed->message;
+						$post_status='<a href="https://blockchain.info/tx/'.urlencode($json_feed->tx_hash).'" target="_blank">'.$json_feed->message.'</a>';
 					}
 				}
 				load_tx();
@@ -283,6 +306,7 @@ if($user){
 		<script type="text/javascript" src="/javascript/btc.js"></script>
 	</head>
 	<body>
+		<!-- <? echo 'trans/'.$user_profile['locale'].'.txt'; ?> -->
 		<div id="container">
 		<?php if($user): ?>
 			<div id="balance" class="clearfix">

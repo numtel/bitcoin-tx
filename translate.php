@@ -21,6 +21,7 @@ $strings=array("Error generating new Bitcoin address.",
 'Need to buy Bitcoins?',
 'Generate new Address',
 'Send Bitcoins to a Facebook Friend',
+'Send Bitcoins to a Bitcoin Address',
 'You have no friends.',
 'Recipient:',
 'Amount:',
@@ -130,12 +131,27 @@ $languages=array (
 $facebook = new Facebook($fb_settings);
 $user = $facebook->getUser();
 
-function utf8_encode_deep(&$input) {
+if($user){
+	try {
+		$user_profile = $facebook->api('/me');
+	} catch (FacebookApiException $e) {
+		error_log($e);
+		$user = null;
+	}
+}
+
+function unicode_escape($str){
+	$working = json_encode($str);
+	$working = preg_replace('/\\\u([0-9a-z]{4})/', '&#x$1;', $working);
+	return json_decode($working);
+}
+
+function entity_encode_deep(&$input) {
     if (is_string($input)) {
-        $input = utf8_encode($input);
+        $input = unicode_escape($input);
     } else if (is_array($input)) {
         foreach ($input as &$value) {
-            utf8_encode_deep($value);
+            entity_encode_deep($value);
         }
 
         unset($value);
@@ -143,7 +159,7 @@ function utf8_encode_deep(&$input) {
         $vars = array_keys(get_object_vars($input));
 
         foreach ($vars as $var) {
-            utf8_encode_deep($input->$var);
+            entity_encode_deep($input->$var);
         }
     }
 }
@@ -156,7 +172,7 @@ if($_POST){
 	
 	
 	$data=$_POST;
-	utf8_encode_deep($data);
+	entity_encode_deep($data);
 	$insert_query=$db->prepare('insert into `trans` (`data`) values (?)');
 	$insert_query->execute(array(serialize($data)));
 	$post_status="Thank you for your support! Your response will be processed.";

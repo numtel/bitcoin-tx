@@ -29,7 +29,23 @@ CREATE TABLE `addr` (
   `secret` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`addr_id`),
   KEY `fb_id` (`fb_id`,`btc_addr`,`secret`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=7171 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `error_log`
+--
+
+DROP TABLE IF EXISTS `error_log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `error_log` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `data` blob,
+  `date` datetime DEFAULT NULL,
+  `ip` varchar(15) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -44,7 +60,7 @@ CREATE TABLE `rates` (
   `data` blob,
   `timestamp` int(10) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=611 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -58,7 +74,7 @@ CREATE TABLE `trans` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
   `data` blob,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=311 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -79,7 +95,7 @@ CREATE TABLE `tx` (
   `hash` varchar(64) DEFAULT NULL,
   PRIMARY KEY (`tx_id`),
   KEY `FB_id` (`fb_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=12871 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -105,4 +121,4 @@ CREATE TABLE `user` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-04-04 22:05:43
+-- Dump completed on 2013-04-05 15:13:56
