@@ -1,0 +1,146 @@
+/*
+  title: bitcoin transactions css
+*/
+
+
+/* =global elements
+--------------------------------------------- */
+body {
+  color: #666;
+  font: 14px/1.5em "Lucida Grande", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  width: 720px;
+  margin: 20px;
+}
+
+a:link, a:visited {
+  color: #3b5998;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+a:hover, a:active {
+  text-decoration: underline;
+}
+
+p { font-size:12px; }
+
+#container {background-color:#f2f2f2;border-top:1px solid #ccc;border-bottom:1px solid #ccc;padding:20px;}
+
+#balance {background:url(../images/bitcoin-32.png) no-repeat 20px 20px #fff; color:#000; border:1px solid #ccc; padding:20px 20px 20px 70px; margin-bottom:20px;}
+#balance h2 {font-size:14px; line-height:32px; color:#666; float:left; padding-right:15px;}
+#balance_btc {font-size:24px; line-height:32px; font-weight:bold; float:left; padding-right:60px;}
+#balance .currency_foreign {float:right;}
+
+
+h3 {background-color:#e7e7e7;border-top:1px solid #d0d0d0;margin:0 0 10px; line-height:normal; font-size:11px; font-weight:bold; padding:4px 6px 5px;}
+
+#form_status {background-color:#fff9d7;border:1px solid #e2c822;padding:10px; margin:20px 0; font-size:12px; font-weight:bold;}
+
+button {background-image:url(../images/WCWeQT3eSXp.png);background-repeat:no-repeat;background-size:auto;background-position:-352px -495px;background-color:#5b74a8;border-color:#29447e #29447e #1a356e; border-width:1px; color:#fff;cursor:pointer;display:inline-block;font-family:'lucida grande',tahoma,verdana,arial,sans-serif;font-size:11px;font-weight:bold;line-height:13px;margin:0;padding:3px 8px 4px; min-width:68px; text-align:center;white-space:nowrap;}
+button:active{background:#4f6aa3;border-bottom-color:#29447e}
+
+#add_bitcoins img {float:left; margin:0 20px 20px 0;}
+#add_bitcoins .address { font-style:italic; color:#333; }
+#add_bitcoins .buy-some { font-size:10px;}
+#add_bitcoins button { margin-left:0; }
+
+#send_to_fb,
+#send_to_btc {float:left; width:330px; margin-bottom:20px;}
+#send_to_fb {margin-right:20px;}
+#send_to_fb .no-friends { text-align:center; font-style:italic;}
+
+.field label { width:60px; float:left; text-align:right; font-size:11px; line-height:22px; font-weight:bold; padding-right:10px; }
+.field input {border:1px solid #bdc7d8; padding:3px 3px 4px 5px; font-size:11px; line-height:12px; color:#000; width:215px; margin-bottom:2px;}
+.field select {width:215px;}
+.field .suffix {font-size:11px; line-height:22px; }
+.field .note { display:block; padding-left:70px; font-size:10px; }
+.field .note .foreign-val { display:block; }
+
+.operation button { margin-left:70px; }
+
+#tx { background:#fff; width:100%; }
+#tx th { font-size:11px; font-weight:bold; border-bottom:1px solid #ddd; }
+#tx td { font-size:11px; padding:5px; border:1px solid #eee; vertical-align:middle; }
+#tx td.date { text-align:center; }
+#tx td.withdrawl,
+#tx td.deposit,
+#tx td.balance { text-align:right; }
+
+#tx .foreign_id {display:block; line-height:32px;}
+#tx .foreign_id img { float:left; width:32px; margin-right:10px; }
+#tx tr.fb .foreign_id {font-size:14px;}
+#tx tr.btc .foreign_id { padding-left:42px; background:url(../images/bitcoin-32.png) no-repeat 0 0;}
+
+#pager {text-align:center; padding-top:10px;}
+#pager li { display:inline-block; padding:0 8px;}
+#pager .previous { float:right; }
+#pager .next { float:left;}
+
+#footer {margin-top:20px; }
+#share { float:right; }
+
+
+#translate .field-scroll {height:800px; overflow:auto; background:#f9f9f9; margin:20px 0;}
+#translate .string {padding:10px; border-bottom:1px solid #ccc;}
+#translate .string span { display:block; font-size:12px; color:#333;}
+#translate .string input {border:1px solid #bdc7d8; padding:3px 3px 4px 5px; font-size:11px; line-height:12px; color:#000; width:600px;}
+#translate .back-to-home { float:right; font-size:10px;}
+
+.facebook-button:link, .facebook-button:visited {
+  background-color: #eee;
+  background-image: -moz-linear-gradient(top, #fdfdfd, #eaebeb);
+  background-image: -ms-linear-gradient(top, #fdfdfd, #eaebeb);
+  background-image: -o-linear-gradient(top, #fdfdfd, #eaebeb));
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#fdfdfd), to(#eaebeb));
+  background-image: -webkit-linear-gradient(top, #fdfdfd, #eaebeb);
+  background-image: linear-gradient(top, #fdfdfd, #eaebeb);
+  border: 1px solid #a9a9a9;
+  -moz-box-shadow: 0 1px 0 rgba(0, 0, 0, .1);
+  -webkit-box-shadow: 0 1px 0 rgba(0, 0, 0, .1);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, .1);
+  color: #4f4f4f;
+  display: -moz-inline-box;
+  display: inline-block;
+  font-family: 'Lucida Grande', Tahoma, Verdana, Arial, sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+  line-height: 20px;
+  margin: 0;
+  outline: none;
+  text-decoration: none;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, .33);
+}
+
+.facebook-button span {
+  background: url("../images/sprites.png") no-repeat;
+  padding: 0 7px 0 21px;
+}
+
+.facebook-button .speech-bubble {
+  background-position: 6px 3px;
+}
+
+.facebook-button .plus {
+  background-position: 6px -17px;
+}
+
+.facebook-button .apprequests {
+  background-position: 6px -37px;
+}
+
+
+
+.clearfix:after {
+  clear: both;
+  content: ".";
+  display: block;
+  font-size: 0;
+  height: 0;
+  line-height: 0;
+  visibility: hidden;
+}
+
+.clearfix {
+  zoom: 1;
+}
