@@ -58,7 +58,7 @@ jQuery(function($){
 		FB.ui({method: 'apprequests',message: 'Send Bitcoins to your friends!'},function (response) {});
 	});
 	
-	$('#request-recip').on('click',function(e){
+	$('a.request-user').on('click',function(e){
 		var link=$(this),
 			amount=link.attr('data-amount'),
 			recipient=link.attr('data-recip');

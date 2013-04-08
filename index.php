@@ -121,10 +121,16 @@ if($user){
 	}
 	
 	//load this user
-	$user_query=$db->prepare('select * from `user` where `fb_id` = ?');
-	$user_query->execute(array($user));
-	$user_row=$user_query->fetchAll();
-	if(count($user_row)===0){
+	function user_activated($fb_id=false){
+		global $user, $db;
+		if($fb_id===false) $fb_id=$user;
+		$user_query=$db->prepare('select * from `user` where `fb_id` = ?');
+		$user_query->execute(array($fb_id));
+		$user_row=$user_query->fetchAll();
+		if(count($user_row)===0) return false;
+		return $user_row[0]['activated'];
+	}
+	if(user_activated()===false){
 		//user's first access!
 		$user_create_query=$db->prepare('insert into `user` (`fb_id`,`activated`) values (?, ?)');
 		$user_create_query->execute(array($user,date('Y-m-d H:i:s')));
@@ -272,7 +278,7 @@ if($user){
 							'template'=> '@['.$user.'] has just sent you '.$_POST['amount'].' BTC!'
 						));
 					}catch(Exception $e){
-						$post_status.=' <a href="javascript:" id="request-recip" data-user="'.$user.'" data-recip="'.$_POST['fb_recip'].'" data-amount="'.$_POST['amount'].'">'._tr('This user has not installed this app and will not be notified automatically. Please send them a message so they can access their Bitcoins.').'</a>';
+						$post_status.=' <a href="javascript:" id="request-recip" class="request-user" data-recip="'.$_POST['fb_recip'].'" data-amount="'.$_POST['amount'].'">'._tr('This user has not installed this app and will not be notified automatically. Please send them a message so they can access their Bitcoins.').'</a>';
 					}
 				}else{
 					$response=file_get_contents('https://blockchain.info/merchant/'.urlencode($blockchain_guid).'/payment?password='.urlencode($blockchain_pw).'&to='.urlencode($_POST['btc_addr']).'&amount='.urlencode($amount));
@@ -401,8 +407,19 @@ if($user){
 									<span class="foreign_id">
 										<? if($is_intra_fb){
 											$friend_info = json_decode(file_get_contents('http://graph.facebook.com/'.$tx_row['fb_recip']));
+											if(!$is_deposit){
+												$friend_activated=user_activated($tx_row['fb_recip']);
+												if($friend_activated===false){
+													echo '<a href="javascript:" class="request-user" data-recip="'.$tx_row['fb_recip'].'" data-amount="'.($tx_row['amount']/100000000).'">';
+												}
+											}
 											echo '<img src="https://graph.facebook.com/'.$tx_row['fb_recip'].'/picture?type=square" alt="'.$friend_info->name.'">';
 											echo $friend_info->name;
+											
+											if(!$is_deposit && $friend_activated===false){
+												echo '</a>';
+											}
+											
 										}else{
 											echo $tx_row['btc_addr'];
 										}
