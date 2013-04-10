@@ -10,4 +10,5 @@ $fb_settings=array(
 );
 $fb_tx_fee=10000; //in satoshi (0.0001 BTC)
 $tx_per_page=10;
+$revert_duration="60 days";
 

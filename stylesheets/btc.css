@@ -71,6 +71,7 @@ button:active{background:#4f6aa3;border-bottom-color:#29447e}
 #tx .foreign_id img { float:left; width:32px; margin-right:10px; }
 #tx tr.fb .foreign_id {font-size:14px;}
 #tx tr.btc .foreign_id { padding-left:42px; background:url(../images/bitcoin-32.png) no-repeat 0 0;}
+#tx tr.revert .foreign_id { padding-left:42px; background:url(../images/right-arrow-red.png) no-repeat 0 0;}
 
 #pager {text-align:center; padding-top:10px;}
 #pager li { display:inline-block; padding:0 8px;}

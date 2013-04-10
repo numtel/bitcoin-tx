@@ -136,6 +136,20 @@ if($user){
 		$user_create_query->execute(array($user,date('Y-m-d H:i:s')));
 	}
 	
+	//revert old transactions
+	$revert_query=$db->prepare("SELECT `tx`.`tx_id`,`tx`.`fb_id`,`tx`.`amount` FROM `tx` left join `user` on `user`.`fb_id`=`tx`.`fb_id` where `fb_recip` = ? and `date` < ? and `type`=1 and `user`.`activated` is null");
+	$revert_query->execute(array($user, date('Y-m-d',strtotime('-'.$revert_duration))));
+	$revert_data=$revert_query->fetchAll();
+
+	foreach($revert_data as $tx){
+		$revert_tx_query=$db->prepare("UPDATE `tx` SET `fb_id`='revert', `type`=3, `hash`=? WHERE `tx_id`=?");
+		if($revert_tx_query->execute(array($tx['fb_id'],$tx['tx_id']))){
+			$revert_tx_query_2=$db->prepare('insert into `tx` (`fb_id`,`type`,`btc_addr`,`fb_recip`,`date`,`amount`,`hash`) values (?, ?, ?, ?, ?, ?, ?)');
+			$revert_tx_query_2->execute(array($user,'1',null,$tx['fb_id'],date('Y-m-d H:i:s'),$tx['amount'],'revert'));
+		}
+	}
+
+	
 	//load transactions
 	function load_tx(){
 		global $db, $user, $tx_data, $tx_count, $balance, $fb_tx_fee, 
@@ -399,24 +413,29 @@ if($user){
 							if($display_index-1<($display_page-1)*$tx_per_page || $display_index-1>=$display_page*$tx_per_page) continue;
 							$is_intra_fb=$tx_row['fb_recip']!==NULL;
 							$is_deposit=(int)$tx_row['type']===1;
+							$is_revert=$tx_row['hash']==='revert';
+							$reverted_already=strtotime($tx_row['date'])<strtotime('-'.$revert_duration);
 						?>
-							<tr class="<?=$is_intra_fb ? 'fb' : 'btc'?>">
+							<tr class="<?=$is_intra_fb ? ($is_revert ? 'revert' : 'fb') : 'btc'?>">
 								<td class="date"><?=$tx_row['date']?></td>
 								<td class="desc">
-									<span class="qualifier"><?=$is_deposit ? _tr('Deposit from:') : _tr('Withdrawal to:')?></span>
+									<span class="qualifier"><?=$is_deposit ? _tr('Deposit from:') : _tr('Withdrawal to:')?><?=$is_revert ? ' ('._tr('Reverted').')' : ''?></span>
 									<span class="foreign_id">
 										<? if($is_intra_fb){
 											$friend_info = json_decode(file_get_contents('http://graph.facebook.com/'.$tx_row['fb_recip']));
-											if(!$is_deposit){
+											if(!$is_deposit && !$reverted_already){
 												$friend_activated=user_activated($tx_row['fb_recip']);
 												if($friend_activated===false){
 													echo '<a href="javascript:" class="request-user" data-recip="'.$tx_row['fb_recip'].'" data-amount="'.($tx_row['amount']/100000000).'">';
 												}
 											}
-											echo '<img src="https://graph.facebook.com/'.$tx_row['fb_recip'].'/picture?type=square" alt="'.$friend_info->name.'">';
+											if(!$is_revert){
+												echo '<img src="https://graph.facebook.com/'.$tx_row['fb_recip'].'/picture?type=square" alt="'.$friend_info->name.'">';
+											}
+											
 											echo $friend_info->name;
 											
-											if(!$is_deposit && $friend_activated===false){
+											if(!$is_deposit && !$reverted_already && $friend_activated===false){
 												echo '</a>';
 											}
 											
