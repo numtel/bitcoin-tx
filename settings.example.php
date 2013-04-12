@@ -9,6 +9,7 @@ $fb_settings=array(
   'secret' => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
 );
 $fb_tx_fee=10000; //in satoshi (0.0001 BTC)
+$btc_tx_fee=50000; //in satoshi (0.0005 BTC)
 $tx_per_page=10;
 $revert_duration="60 days";
 

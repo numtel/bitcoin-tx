@@ -267,7 +267,7 @@ if($user){
 					$post_status=_tr("Error: Send amount must be at least 1 satoshi (1/100000000 BTC)");
 					break;
 				}
-				if($amount+($is_intra_fb ? $fb_tx_fee : 0)>$balance){
+				if($amount+($is_intra_fb ? $fb_tx_fee : $btc_tx_fee)>$balance){
 					$post_status=_tr("Error: Insufficient Funds for Transfer");
 					break;
 				}
@@ -301,6 +301,7 @@ if($user){
 						$post_status=$json_feed->error;
 					}else{
 						$btc_tx_query->execute(array($user,'2',$_POST['btc_addr'],null,$timestamp,$amount,$json_feed->tx_hash));
+						$btc_tx_query->execute(array($user,'2',null,'fee',$timestamp,$btc_tx_fee,null));
 						$post_status='<a href="https://blockchain.info/tx/'.urlencode($json_feed->tx_hash).'" target="_blank">'.$json_feed->message.'</a>';
 					}
 				}
@@ -383,7 +384,7 @@ if($user){
 						<label for="btc_amount"><?=_tr('Amount:')?></label>
 						<input id="btc_amount" name="amount" />
 						<span class="suffix">BTC</span>
-						<span class="note"><span class="foreign-val"></span>฿0.0005 <?=_tr('Fee subtracted from this transaction.')?></span>
+						<span class="note"><span class="foreign-val"></span>฿0.0005 <?=_tr('Fee added to this transaction.')?></span>
 					</div>
 					<input type="hidden" name="action" value="send_to_btc" />
 					<button type="submit"><?=_tr('Send')?></button>
