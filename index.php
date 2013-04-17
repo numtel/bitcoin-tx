@@ -40,20 +40,31 @@ if(
 	isset($_GET['input_address']) && 
 	isset($_GET['secret']) && 
 	isset($_GET['value']) && 
-	isset($_GET['transaction_hash'])
+	isset($_GET['transaction_hash']) && 
+	isset($_GET['confirmations'])
 ){
 	$test_query=$db->prepare('select * from `addr` where `fb_id` = ? and `btc_addr` = ? and `secret` = ?');
 	$test_query->execute(array($_GET['fb_id'],$_GET['input_address'],$_GET['secret']));
 	$test_data=$test_query->fetchAll();
 	if(count($test_data)>0){
-		$btc_insert_query=$db->prepare('insert into `tx` (`fb_id`,`type`,`btc_addr`,`date`,`amount`,`hash`) values (?, 1, ?, ?, ?, ?)');
-		$btc_insert_query->execute(array(
-			$_GET['fb_id'],
-			$_GET['input_address'],
-			date('Y-m-d H:i:s'),
-			$_GET['value'],
-			$_GET['transaction_hash']
-		));
+		if($_GET['confirmations']>=6){
+			//declare transaction approved
+			$btc_update_query=$db->prepare('update `tx` SET `type`=1 WHERE `hash`=?');
+			$btc_update_query->execute(array($_GET['transaction_hash']));
+			die('*ok*');
+		}else{
+			//create pending item
+			$btc_insert_query=$db->prepare('insert into `tx` (`fb_id`,`type`,`btc_addr`,`date`,`amount`,`hash`) values (?, ?, ?, ?, ?, ?)');
+			$btc_insert_query->execute(array(
+				$_GET['fb_id'],
+				'4',
+				$_GET['input_address'],
+				date('Y-m-d H:i:s'),
+				$_GET['value'],
+				$_GET['transaction_hash']
+			));
+			die('');
+		}
 	}else{
 		//record potential DDOS
 		if(isset($_SERVER ['HTTP_X_FORWARDED_FOR'])){
@@ -65,8 +76,8 @@ if(
 		}
 		$error_query=$db->prepare('insert into `error_log` (`data`,`date`,`ip`) values (?, ?, ?)');
 		$error_query->execute(array(serialize($_GET),date('Y-m-d H:i:s'),$clientIP));
+		die('error');
 	}
-	die('*ok*');
 }
 
 
@@ -384,7 +395,7 @@ if($user){
 						<label for="btc_amount"><?=_tr('Amount:')?></label>
 						<input id="btc_amount" name="amount" />
 						<span class="suffix">BTC</span>
-						<span class="note"><span class="foreign-val"></span>฿0.0005 <?=_tr('Fee added to this transaction.')?></span>
+						<span class="note"><span class="foreign-val"></span>฿<?=$btc_tx_fee/100000000?> <?=_tr('Fee added to this transaction.')?></span>
 					</div>
 					<input type="hidden" name="action" value="send_to_btc" />
 					<button type="submit"><?=_tr('Send')?></button>
@@ -413,14 +424,15 @@ if($user){
 							++$display_index;
 							if($display_index-1<($display_page-1)*$tx_per_page || $display_index-1>=$display_page*$tx_per_page) continue;
 							$is_intra_fb=$tx_row['fb_recip']!==NULL;
-							$is_deposit=(int)$tx_row['type']===1;
+							$is_deposit=(int)$tx_row['type']===1 || (int)$tx_row['type']===4;
+							$is_pending=(int)$tx_row['type']===4;
 							$is_revert=$tx_row['hash']==='revert';
 							$reverted_already=strtotime($tx_row['date'])<strtotime('-'.$revert_duration);
 						?>
 							<tr class="<?=$is_intra_fb ? ($is_revert ? 'revert' : 'fb') : 'btc'?>">
 								<td class="date"><?=$tx_row['date']?></td>
 								<td class="desc">
-									<span class="qualifier"><?=$is_deposit ? _tr('Deposit from:') : _tr('Withdrawal to:')?><?=$is_revert ? ' ('._tr('Reverted').')' : ''?></span>
+									<span class="qualifier"><?=$is_deposit ? _tr('Deposit from:') : _tr('Withdrawal to:')?><?=$is_revert ? ' ('._tr('Reverted').')' : ''?><?=$is_pending ? ' ('._tr('Pending').')' : ''?></span>
 									<span class="foreign_id">
 										<? if($is_intra_fb){
 											$friend_info = json_decode(file_get_contents('http://graph.facebook.com/'.$tx_row['fb_recip']));
@@ -447,7 +459,7 @@ if($user){
 								</td>
 								<td class="deposit"><?=$is_deposit ? $tx_row['amount']/100000000 : ''?></td>
 								<td class="withdrawl"><?=!$is_deposit ? $tx_row['amount']/100000000 : ''?></td>
-								<td class="balance"><?=$tx_row['balance']/100000000?></td>
+								<td class="balance"><?=$is_pending ? '' : $tx_row['balance']/100000000?></td>
 							</tr>
 						<? endfor; ?>
 					<? endif; ?>
