@@ -313,13 +313,17 @@ if($user){
 					}
 				}else{
 					$response=file_get_contents('https://blockchain.info/merchant/'.urlencode($blockchain_guid).'/payment?password='.urlencode($blockchain_pw).'&to='.urlencode($_POST['btc_addr']).'&amount='.urlencode($amount));
-					$json_feed = json_decode($response);
-					if(property_exists($json_feed,'error')){
-						$post_status=$json_feed->error;
+					if($response===false){
+						$post_status=_tr('Error Connecting to Blockchain.info! Please try again later.');
 					}else{
-						$btc_tx_query->execute(array($user,'2',$_POST['btc_addr'],null,$timestamp,$amount,$json_feed->tx_hash));
-						$btc_tx_query->execute(array($user,'2',null,'fee',$timestamp,$btc_tx_fee,null));
-						$post_status='<a href="https://blockchain.info/tx/'.urlencode($json_feed->tx_hash).'" target="_blank">'.$json_feed->message.'</a>';
+						$json_feed = json_decode($response);
+						if(property_exists($json_feed,'error')){
+							$post_status=$json_feed->error;
+						}else{
+							$btc_tx_query->execute(array($user,'2',$_POST['btc_addr'],null,$timestamp,$amount,$json_feed->tx_hash));
+							$btc_tx_query->execute(array($user,'2',null,'fee',$timestamp,$btc_tx_fee,null));
+							$post_status='<a href="https://blockchain.info/tx/'.urlencode($json_feed->tx_hash).'" target="_blank">'.$json_feed->message.'</a>';
+						}
 					}
 				}
 				load_tx();
