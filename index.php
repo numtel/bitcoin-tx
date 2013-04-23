@@ -284,6 +284,10 @@ if($user){
 					$post_status=_tr("Error: Send amount must be at least 1 satoshi (1/100000000 BTC)");
 					break;
 				}
+				if($amount<0){
+					$post_status=_tr("Error: Invalid send amount!");
+					break;
+				}
 				if($amount+($is_intra_fb ? $fb_tx_fee : $btc_tx_fee)>$balance){
 					$post_status=_tr("Error: Insufficient Funds for Transfer");
 					break;
@@ -511,6 +515,7 @@ if($user){
 				</div>
 				<p><?=_tr('Send Bitcoins to ')?><em>1DUerWAepez56PziZTnSBzT2jFTF4722eK</em></p>
 				<p><a href="translate.php"><?=_tr('Submit a translation of the interface')?></a></p>
+				<p><a href="mailto:ben@salamanderphp.com"><?=_tr('Contact:')?> ben@salamanderphp.com</a></p>
 			</div>
 		<?php else: ?>
 			<p>In order to use this application, you must be logged in and registered.<br />Click on the login button below and accept the message to begin using Bitcoin Transactions.</p>
