@@ -33,6 +33,20 @@ $db_url=parse_url(getenv("CLEARDB_DATABASE_URL"));
 $db_dns='mysql:host='.$db_url["host"].';dbname='.substr($db_url["path"],1);
 $db=new PDO($db_dns, $db_url["user"], $db_url["pass"]);
 
+//error recording
+function record_error($blob){
+	global $db;
+	if(isset($_SERVER ['HTTP_X_FORWARDED_FOR'])){
+		$clientIP = $_SERVER ['HTTP_X_FORWARDED_FOR'];
+	}elseif(isset($_SERVER ['HTTP_X_REAL_IP'])){
+		$clientIP = $_SERVER ['HTTP_X_REAL_IP'];
+	}else{
+		$clientIP = $_SERVER['REMOTE_ADDR'];
+	}
+	$error_query=$db->prepare('insert into `error_log` (`data`,`date`,`ip`) values (?, ?, ?)');
+	return $error_query->execute(array($blob,date('Y-m-d H:i:s'),$clientIP));
+}
+
 //process blockchain callback from fund addage
 if(
 	isset($_GET['create_addr']) && $_GET['create_addr'] && 
@@ -73,15 +87,7 @@ if(
 		}
 	}else{
 		//record potential DDOS
-		if(isset($_SERVER ['HTTP_X_FORWARDED_FOR'])){
-			$clientIP = $_SERVER ['HTTP_X_FORWARDED_FOR'];
-		}elseif(isset($_SERVER ['HTTP_X_REAL_IP'])){
-			$clientIP = $_SERVER ['HTTP_X_REAL_IP'];
-		}else{
-			$clientIP = $_SERVER['REMOTE_ADDR'];
-		}
-		$error_query=$db->prepare('insert into `error_log` (`data`,`date`,`ip`) values (?, ?, ?)');
-		$error_query->execute(array(serialize($_GET),date('Y-m-d H:i:s'),$clientIP));
+		record_error(serialize($_GET));
 		die('error');
 	}
 }
@@ -318,11 +324,13 @@ if($user){
 				}else{
 					$response=file_get_contents('https://blockchain.info/merchant/'.urlencode($blockchain_guid).'/payment?password='.urlencode($blockchain_pw).'&to='.urlencode($_POST['btc_addr']).'&amount='.urlencode($amount));
 					if($response===false){
-						$post_status=_tr('Error Connecting to Blockchain.info! Please try again later.');
+						$_POST['error-message']=$post_status=_tr('Error Connecting to Blockchain.info! Please try again later.');
+						record_error(serialize($_POST));
 					}else{
 						$json_feed = json_decode($response);
 						if(property_exists($json_feed,'error')){
-							$post_status=$json_feed->error;
+							$_POST['error-message']=$post_status=$json_feed->error;
+							record_error(serialize($_POST));
 						}else{
 							$btc_tx_query->execute(array($user,'2',$_POST['btc_addr'],null,$timestamp,$amount,$json_feed->tx_hash));
 							$btc_tx_query->execute(array($user,'2',null,'fee',$timestamp,$btc_tx_fee,null));
