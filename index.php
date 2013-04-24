@@ -290,7 +290,7 @@ if($user){
 					$post_status=_tr("Error: Send amount must be at least 1 satoshi (1/100000000 BTC)");
 					break;
 				}
-				if($amount<0){
+				if($amount<=0){
 					$post_status=_tr("Error: Invalid send amount!");
 					break;
 				}
