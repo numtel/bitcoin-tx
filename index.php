@@ -1,6 +1,16 @@
 <?php
 //error_reporting(E_ALL);
 //ini_set("display_errors", 1);
+
+require 'settings.php';
+require 'sdk/src/facebook.php';
+
+	
+//connect to facebook
+$facebook = new Facebook($fb_settings);
+$user = $facebook->getUser();
+
+
 if(isset($_GET['sid'])){
 	$a = session_id($_GET['sid']);
 }else{
@@ -12,9 +22,6 @@ if (!isset($_SESSION['safety'])) {
 	$_SESSION['safety'] = true;
 }
 $_SESSION['sessionid'] = session_id();
-
-require 'settings.php';
-require 'sdk/src/facebook.php';
 
 //localization
 $cur_language=array();
@@ -117,10 +124,7 @@ if(count($rate_data)===0 || $rate_data[0]['timestamp']*1<strtotime('-15 minutes'
 	//give cached rates
 	$rates=$rate_data[0]['data'];
 }
-	
-//connect to facebook
-$facebook = new Facebook($fb_settings);
-$user = $facebook->getUser();
+
 
 if($user){
 	try {
