@@ -323,7 +323,7 @@ if($user){
 							'template'=> '@['.$user.'] has just sent you '.$_POST['amount'].' BTC!'
 						));
 					}catch(Exception $e){
-						$post_status.=' <a href="javascript:" id="request-recip" class="request-user" data-recip="'.$_POST['fb_recip'].'" data-amount="'.$_POST['amount'].'">'._tr('This user has not installed this app and will not be notified automatically. Please send them a message so they can access their Bitcoins.').'</a>';
+						$post_status.=' '._tr('This user has not installed this app and will not be notified automatically. Please send them a message so they can access their Bitcoins.').' '.'<a href="javascript:" class="request-user" data-recip="'.$_POST['fb_recip'].'" data-amount="'.$_POST['amount'].'">'._tr('Send Request to Install App').'</a> or <a href="javascript:" class="post-to-recip-wall" data-recip="'.$_POST['fb_recip'].'" data-amount="'.$_POST['amount'].'">'._tr('Post to Their Wall').'</a>';
 					}
 				}else{
 					$response=file_get_contents('https://blockchain.info/merchant/'.urlencode($blockchain_guid).'/payment?password='.urlencode($blockchain_pw).'&to='.urlencode($_POST['btc_addr']).'&amount='.urlencode($amount));
@@ -358,6 +358,7 @@ if($user){
 		<link rel="stylesheet" href="stylesheets/btc.css" type="text/css" />
 		<link rel="stylesheet" href="javascript/chosen.css" type="text/css" />
 		<script>var appurl='<?=$app_url?>',
+					hosturl='<?=$callback_url?>',
 					rates=<?=$rates?>;</script>
 		<script type="text/javascript" src="/javascript/jquery-1.7.1.min.js"></script>
 		<script type="text/javascript" src="/javascript/chosen.jquery.min.js"></script>
@@ -458,25 +459,28 @@ if($user){
 							<tr class="<?=$is_intra_fb ? ($is_revert ? 'revert' : 'fb') : 'btc'?>">
 								<td class="date"><?=$tx_row['date']?></td>
 								<td class="desc">
-									<span class="qualifier"><?=$is_deposit ? _tr('Deposit from:') : _tr('Withdrawal to:')?><?=$is_revert ? ' ('._tr('Reverted').')' : ''?><?=$is_pending ? ' ('._tr('Pending').')' : ''?></span>
+									<?
+										if(!$is_deposit && !$reverted_already){
+											$friend_activated=user_activated($tx_row['fb_recip']);
+											if($friend_activated===false){
+												echo '<span class="not-activated"><a href="javascript:" class="request-user" data-recip="'.$tx_row['fb_recip'].'" data-amount="'.($tx_row['amount']/100000000).'">'._tr('Send Request to Install App').'</a> or <a href="javascript:" class="post-to-recip-wall" data-recip="'.$tx_row['fb_recip'].'" data-amount="'.($tx_row['amount']/100000000).'">'._tr('Post to Their Wall').'</a></span>';
+											}
+										}
+									?>
+									<span class="qualifier">
+										<?=$is_deposit ? _tr('Deposit from:') : _tr('Withdrawal to:')?>
+										<?=$is_revert ? ' ('._tr('Reverted').')' : ''?>
+										<?=$is_pending ? ' ('._tr('Pending').')' : ''?>
+									</span>
 									<span class="foreign_id">
 										<? if($is_intra_fb){
 											$friend_info = json_decode(file_get_contents('http://graph.facebook.com/'.$tx_row['fb_recip']));
-											if(!$is_deposit && !$reverted_already){
-												$friend_activated=user_activated($tx_row['fb_recip']);
-												if($friend_activated===false){
-													echo '<a href="javascript:" class="request-user" data-recip="'.$tx_row['fb_recip'].'" data-amount="'.($tx_row['amount']/100000000).'">';
-												}
-											}
+											
 											if(!$is_revert){
 												echo '<img src="https://graph.facebook.com/'.$tx_row['fb_recip'].'/picture?type=square" alt="'.$friend_info->name.'">';
 											}
 											
 											echo $friend_info->name;
-											
-											if(!$is_deposit && !$reverted_already && $friend_activated===false){
-												echo '</a>';
-											}
 											
 										}else{
 											echo $tx_row['btc_addr'];
@@ -532,6 +536,7 @@ if($user){
 		<?php else: ?>
 			<p>In order to use this application, you must be logged in and registered.<br />Click on the login button below and accept the message to begin using Bitcoin Transactions.</p>
 			<fb:login-button></fb:login-button>
+			<p><a href="mailto:ben@salamanderphp.com"><?=_tr('Contact:')?> ben@salamanderphp.com</a></p>
 		<?php endif; ?>
 		</div>
 		<div id="fb-root"></div>

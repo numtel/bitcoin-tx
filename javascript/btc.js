@@ -58,14 +58,27 @@ jQuery(function($){
 		FB.ui({method: 'apprequests',message: 'Send Bitcoins to your friends!'},function (response) {});
 	});
 	
-	$('a.request-user').on('click',function(e){
+	$('a.request-user,a.post-to-recip-wall').on('click',function(e){
 		var link=$(this),
 			amount=link.attr('data-amount'),
 			recipient=link.attr('data-recip');
-		FB.ui({method: 'apprequests',
-			message: 'I sent you '+amount+' BTC but you need to install this App to receive it.',
-			to: recipient
-		}, function (response) {});
+			obj={
+				method: 'apprequests',
+				message: 'I sent you '+amount+' BTC but you need to install this App to receive it.',
+				to: recipient
+			};
+		if(link.hasClass('post-to-recip-wall')){
+			obj={
+		      method: 'feed',
+		      link: appurl,
+		      to: recipient,
+		      picture: hosturl+'images/bitcoin-128.png',
+		      name: 'Bitcoin Tranasctions',
+		      caption: 'You\'ve Got Bitcoins!',
+		      description: 'I sent you Bitcoins but you need to install this App to receive it.'
+		    };
+        }
+		FB.ui(obj, function (response) {});
   	});
 
 });
