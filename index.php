@@ -460,7 +460,7 @@ if($user){
 								<td class="date"><?=$tx_row['date']?></td>
 								<td class="desc">
 									<?
-										if(!$is_deposit && !$reverted_already){
+										if($is_intra_fb && !$is_deposit && !$reverted_already){
 											$friend_activated=user_activated($tx_row['fb_recip']);
 											if($friend_activated===false){
 												echo '<span class="not-activated"><a href="javascript:" class="request-user" data-recip="'.$tx_row['fb_recip'].'" data-amount="'.($tx_row['amount']/100000000).'">'._tr('Send Request to Install App').'</a> or <a href="javascript:" class="post-to-recip-wall" data-recip="'.$tx_row['fb_recip'].'" data-amount="'.($tx_row['amount']/100000000).'">'._tr('Post to Their Wall').'</a></span>';
@@ -529,9 +529,10 @@ if($user){
 						<span class="apprequests"><?=_tr('Send Requests')?></span>
 					</a>
 				</div>
-				<p><?=_tr('Send Bitcoins to ')?><em>1DUerWAepez56PziZTnSBzT2jFTF4722eK</em></p>
-				<p><a href="translate.php"><?=_tr('Submit a translation of the interface')?></a></p>
 				<p><a href="mailto:ben@salamanderphp.com"><?=_tr('Contact:')?> ben@salamanderphp.com</a></p>
+				<p><?=_tr('Send Bitcoins to ')?><em>1DUerWAepez56PziZTnSBzT2jFTF4722eK</em></p>
+				<p><strong><?=_tr('Without your donations, this app may shut down due to database costs.')?></strong></p>
+				<p><a href="translate.php"><?=_tr('Submit a translation of the interface')?></a></p>
 			</div>
 		<?php else: ?>
 			<p>In order to use this application, you must be logged in and registered.<br />Click on the login button below and accept the message to begin using Bitcoin Transactions.</p>

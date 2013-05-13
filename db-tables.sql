@@ -94,7 +94,8 @@ CREATE TABLE `tx` (
   `amount` varchar(25) DEFAULT NULL,
   `hash` varchar(64) DEFAULT NULL,
   PRIMARY KEY (`tx_id`),
-  KEY `FB_id` (`fb_id`)
+  KEY `FB_id` (`fb_id`),
+  KEY `hash` (`hash`)
 ) ENGINE=InnoDB AUTO_INCREMENT=12871 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
