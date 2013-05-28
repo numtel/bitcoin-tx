@@ -1,0 +1,9 @@
+<?
+
+function satoshi_to_btc($amount){
+	return $amount/100000000;
+}
+
+function btc_to_satoshi($amount){
+	return $amount*100000000;
+}
